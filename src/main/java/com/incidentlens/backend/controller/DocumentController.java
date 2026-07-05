@@ -2,8 +2,9 @@ package com.incidentlens.backend.controller;
 
 
 import com.incidentlens.backend.entity.Document;
+import com.incidentlens.backend.entity.DocumentChunk;
+import com.incidentlens.backend.service.DocumentProcessingService;
 import com.incidentlens.backend.service.DocumentService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,11 @@ import java.util.Map;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final DocumentProcessingService documentProcessingService;
 
-    public DocumentController(DocumentService documentService) {
+    public DocumentController(DocumentService documentService, DocumentProcessingService documentProcessingService) {
         this.documentService = documentService;
+        this.documentProcessingService = documentProcessingService;
     }
 
     @PostMapping
@@ -72,5 +75,17 @@ public class DocumentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{documentId}/process")
+    public ResponseEntity<Map<String, Object>> processDocument(
+            @PathVariable Long investigationId,
+            @PathVariable Long documentId) throws IOException {
+
+        List<DocumentChunk> chunks = documentProcessingService.processDocument(documentId);
+
+        return ResponseEntity.ok(Map.of(
+                "documentId", documentId,
+                "chunksCreated", chunks.size()
+        ));
+    }
 
 }
