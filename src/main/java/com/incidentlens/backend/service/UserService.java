@@ -19,20 +19,19 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public User registerUser(String name, String email, String rawPassword){
+    public User registerUser(String name, String email, String rawPassword) {
+        String normalizedEmail = email.toLowerCase();
 
-        if(userRepository.existsBy(email)){
-
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new RuntimeException("Email is already in use");
         }
 
         User user = new User();
-        user.setEmail(email.toLowerCase());
+        user.setEmail(normalizedEmail);
         user.setName(name);
         user.setPassword(passwordEncoder.encode(rawPassword));
 
         return userRepository.save(user);
-
     }
 
     public String loginAndGetToken(String email, String rawPassword){
